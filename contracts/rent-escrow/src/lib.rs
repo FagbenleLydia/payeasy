@@ -33,6 +33,7 @@ pub enum DataKey {
 pub struct RentEscrow {
     pub landlord: Address,
     pub rent_amount: i128,
+    pub deadline: u64,
     pub roommates: Map<Address, i128>,
     pub contributions: Map<Address, i128>,
 }
@@ -51,6 +52,7 @@ impl RentEscrowContract {
         landlord: Address,
         rent_amount: i128,
         roommates: Map<Address, i128>,
+        deadline: u64,
     ) -> Result<(), Error> {
         landlord.require_auth();
 
@@ -61,6 +63,7 @@ impl RentEscrowContract {
         env.storage().persistent().set(&DataKey::Escrow, &RentEscrow {
             landlord,
             rent_amount,
+            deadline,
             roommates,
             contributions: Map::new(&env),
         });
@@ -146,6 +149,15 @@ impl RentEscrowContract {
             .get(&DataKey::Escrow)
             .expect("escrow not initialized; call initialize first");
         escrow.landlord
+    }
+
+    /// Retrieve the payment deadline timestamp from persistent storage.
+    pub fn get_deadline(env: Env) -> u64 {
+        let escrow: RentEscrow = env.storage()
+            .persistent()
+            .get(&DataKey::Escrow)
+            .expect("escrow not initialized");
+        escrow.deadline
     }
 
     /// Retrieve the current rent amount from persistent storage.
