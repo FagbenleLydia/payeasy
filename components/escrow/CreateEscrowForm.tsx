@@ -150,12 +150,12 @@ export default function CreateEscrowForm({
            (draft.roommates.length === 1 && isBaseRoommateDirty(draft.roommates[0]));
   }, [draft]);
 
-  // Warn before unload if there are unsaved changes and we haven't submitted
-  useBeforeUnload(isDirty && !submission);
-
   const [errors, setErrors] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submission, setSubmission] = useState<SubmissionState | null>(null);
+
+  // Warn before unload if there are unsaved changes and we haven't submitted
+  useBeforeUnload(isDirty && !submission);
 
   const totalRoommateShares = useMemo(
     () => sumRoommateShares(draft.roommates),
@@ -252,7 +252,7 @@ export default function CreateEscrowForm({
       clearDraft();
 
       // Redirect to success page
-      router.push(`/escrow/success?id=${contractId}`);
+      router.push(`/escrow/success?id=${result.contractId || ""}`);
     } catch (error) {
       setErrors([
         error instanceof Error
