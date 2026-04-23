@@ -1,7 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
+import { SUPPORTED_TOKENS } from "../../lib/stellar/config.ts";
+
 import {
+  assignSupportedToken,
   nextEscrowStep,
   previousEscrowStep,
   toLedgerTimestamp,
@@ -12,7 +15,7 @@ import {
 function baseDraft(): EscrowFormDraft {
   return {
     totalRent: "1200",
-    tokenId: "XLM",
+    tokenAddress: SUPPORTED_TOKENS[0].issuer,
     deadlineDate: "2026-04-01",
     roommates: [
       { id: "a", address: "GAAA", shareAmount: "700" },
@@ -37,7 +40,7 @@ test("deadline date converts to unix ledger timestamp", () => {
 test("step 1 validation blocks empty token and non-positive rent", () => {
   const draft = baseDraft();
   draft.totalRent = "0";
-  draft.tokenId = "";
+  draft.tokenAddress = "";
 
   const result = validateEscrowStep(1, draft);
   assert.equal(result.isValid, false);
@@ -60,4 +63,22 @@ test("step 3 validation passes with exact allocation", () => {
   const result = validateEscrowStep(3, draft);
   assert.equal(result.isValid, true);
   assert.equal(result.errors.length, 0);
+});
+
+test("selecting each supported token stores its issuer in form state", () => {
+  for (const token of SUPPORTED_TOKENS) {
+    const draft = assignSupportedToken(baseDraft(), token);
+    assert.equal(draft.tokenAddress, token.issuer);
+  }
+});
+
+test("selecting USDC stores the documented Stellar testnet issuer", () => {
+  const usdc = SUPPORTED_TOKENS.find((token) => token.symbol === "USDC");
+  assert.ok(usdc);
+
+  const draft = assignSupportedToken(baseDraft(), usdc);
+  assert.equal(
+    draft.tokenAddress,
+    "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"
+  );
 });

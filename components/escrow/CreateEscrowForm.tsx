@@ -2,10 +2,13 @@
 
 import { useMemo, useState } from "react";
 
+import { getSupportedTokenByIssuer } from "@/lib/stellar/config";
 import { getExplorerLink, type ExplorerProvider } from "@/lib/stellar/explorer";
+import TokenSelect from "@/components/ui/token-select";
 
 import RoommateInput from "./RoommateInput";
 import {
+  assignSupportedToken,
   hasExactShareAllocation,
   nextEscrowStep,
   previousEscrowStep,
@@ -18,7 +21,7 @@ import {
 
 interface InitializeEscrowParams {
   totalRent: string;
-  tokenId: string;
+  tokenAddress: string;
   deadlineLedgerTimestamp: number;
 }
 
@@ -116,7 +119,7 @@ export default function CreateEscrowForm({
   const [step, setStep] = useState(1);
   const [draft, setDraft] = useState<EscrowFormDraft>({
     totalRent: "",
-    tokenId: "",
+    tokenAddress: "",
     deadlineDate: "",
     roommates: [createRoommate()],
   });
@@ -135,6 +138,10 @@ export default function CreateEscrowForm({
   const deadlineLedgerTimestamp = useMemo(
     () => toLedgerTimestamp(draft.deadlineDate),
     [draft.deadlineDate]
+  );
+  const selectedToken = useMemo(
+    () => getSupportedTokenByIssuer(draft.tokenAddress),
+    [draft.tokenAddress]
   );
 
   const currentStepLabel = STEP_LABELS[step - 1];
@@ -208,7 +215,7 @@ export default function CreateEscrowForm({
 
       const initializeResult = await activeClient.initialize({
         totalRent: draft.totalRent,
-        tokenId: draft.tokenId.trim(),
+        tokenAddress: draft.tokenAddress.trim(),
         deadlineLedgerTimestamp,
       });
 
@@ -311,27 +318,16 @@ export default function CreateEscrowForm({
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="token-id" className="block text-sm text-dark-400">
+              <label htmlFor="token-address" className="block text-sm text-dark-400">
                 Payment Token
               </label>
-              <input
-                id="token-id"
-                list="token-options"
-                value={draft.tokenId}
-                onChange={(event) =>
-                  setDraft((current) => ({
-                    ...current,
-                    tokenId: event.target.value,
-                  }))
+              <TokenSelect
+                id="token-address"
+                value={draft.tokenAddress}
+                onChange={(token) =>
+                  setDraft((current) => assignSupportedToken(current, token))
                 }
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-dark-100 focus:border-brand-400 focus:outline-none"
-                placeholder="XLM or contract ID"
               />
-              <datalist id="token-options">
-                <option value="XLM" />
-                <option value="USDC" />
-                <option value="TEST:ISSUER" />
-              </datalist>
             </div>
           </>
         ) : null}
@@ -405,7 +401,16 @@ export default function CreateEscrowForm({
               <span className="text-dark-500">Total rent:</span> {draft.totalRent}
             </p>
             <p>
-              <span className="text-dark-500">Payment token:</span> {draft.tokenId}
+              <span className="text-dark-500">Payment token:</span>{" "}
+              {selectedToken
+                ? `${selectedToken.name} (${selectedToken.symbol})`
+                : draft.tokenAddress}
+            </p>
+            <p>
+              <span className="text-dark-500">Token issuer:</span>{" "}
+              <span className="break-all font-mono text-xs sm:text-sm">
+                {draft.tokenAddress}
+              </span>
             </p>
             <p>
               <span className="text-dark-500">Deadline date:</span> {draft.deadlineDate}
