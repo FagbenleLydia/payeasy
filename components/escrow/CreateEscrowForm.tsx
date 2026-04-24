@@ -126,7 +126,7 @@ export default function CreateEscrowForm({
   const [step, setStep] = useState(1);
   const initialValues: EscrowFormDraft = useMemo(() => ({
     totalRent: "",
-    tokenId: "",
+    tokenAddress: "",
     deadlineDate: "",
     roommates: [createRoommate()],
   }), []);
@@ -148,7 +148,7 @@ export default function CreateEscrowForm({
     const isBaseRoommateDirty = (r: RoommateInputValue) => r.address !== "" || r.shareAmount !== "";
     
     return draft.totalRent !== "" || 
-           draft.tokenId !== "" || 
+           draft.tokenAddress !== "" ||
            draft.deadlineDate !== "" || 
            draft.roommates.length > 1 ||
            (draft.roommates.length === 1 && isBaseRoommateDirty(draft.roommates[0]));
@@ -175,7 +175,7 @@ export default function CreateEscrowForm({
     const errs: Record<string, string> = {};
     if (step === 1 || step === 4) {
       if (!draft.totalRent || Number(draft.totalRent) <= 0) errs.totalRent = "Required";
-      if (!draft.tokenId.trim()) errs.tokenId = "Required";
+      if (!draft.tokenAddress.trim()) errs.tokenAddress = "Required";
     }
     if (step === 2 || step === 4) {
       if (!toLedgerTimestamp(draft.deadlineDate)) errs.deadlineDate = "Set a valid deadline date.";
@@ -252,6 +252,11 @@ export default function CreateEscrowForm({
   const remainingAmount = useMemo(
     () => calculateRemainingAmount(draft.totalRent, draft.roommates),
     [draft.totalRent, draft.roommates]
+  );
+
+  const hasInvalidAddress = useMemo(
+    () => draft.roommates.some((r) => !r.address.trim()),
+    [draft.roommates]
   );
 
   const currentStepLabel = STEP_LABELS[step - 1];
@@ -474,14 +479,14 @@ export default function CreateEscrowForm({
               <input
                 id="token-id"
                 list="token-options"
-                value={draft.tokenId}
+                value={draft.tokenAddress}
                 onChange={(event) => {
-                  setDraft((current) => ({ ...current, tokenId: event.target.value }));
-                  if (event.target.value.trim()) clearFieldError("tokenId");
+                  setDraft((current) => ({ ...current, tokenAddress: event.target.value }));
+                  if (event.target.value.trim()) clearFieldError("tokenAddress");
                 }}
-                aria-describedby={fieldErrors.tokenId ? "token-id-error" : undefined}
-                aria-invalid={!!fieldErrors.tokenId}
-                className={`w-full rounded-xl border bg-white/5 px-4 py-3 text-dark-100 focus:outline-none transition-colors ${fieldBorderClass(fieldErrors.tokenId, !!draft.tokenId.trim())}`}
+                aria-describedby={fieldErrors.tokenAddress ? "token-id-error" : undefined}
+                aria-invalid={!!fieldErrors.tokenAddress}
+                className={`w-full rounded-xl border bg-white/5 px-4 py-3 text-dark-100 focus:outline-none transition-colors ${fieldBorderClass(fieldErrors.tokenAddress, !!draft.tokenAddress.trim())}`}
                 placeholder="XLM or contract ID"
               />
               <datalist id="token-options">
@@ -489,7 +494,7 @@ export default function CreateEscrowForm({
                 <option value="USDC" />
                 <option value="TEST:ISSUER" />
               </datalist>
-              <FieldError id="token-id-error" message={fieldErrors.tokenId} />
+              <FieldError id="token-id-error" message={fieldErrors.tokenAddress} />
             </div>
           </>
         ) : null}
@@ -553,7 +558,7 @@ export default function CreateEscrowForm({
               <p>Total rent: {draft.totalRent || "0"}</p>
               <p>Total roommate shares: {totalRoommateShares.toFixed(7).replace(/\.0+$/, "")}</p>
               <p className={remainingAmount < 0 ? "text-red-400 font-medium" : ""}>
-                Remaining: {remainingAmount.toFixed(7).replace(/\.?0+$/, "")} {draft.tokenId || "XLM"}
+                Remaining: {remainingAmount.toFixed(7).replace(/\.?0+$/, "")} {draft.tokenAddress || "XLM"}
               </p>
               <p className={sharesMatchTotal ? "text-accent-300" : "text-red-300"}>
                 {sharesMatchTotal
