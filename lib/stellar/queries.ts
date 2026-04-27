@@ -1,3 +1,5 @@
+import { withRetry } from "./retry";
+
 // ─── Interfaces ───────────────────────────────────────────────────────────────
 
 export interface SimulateTransactionResponse {
@@ -300,7 +302,7 @@ export async function getContractState(contractId: string): Promise<ContractStat
       async simulateTransaction(xdrStr: string): Promise<SimulateTransactionResponse> {
         try {
           const tx = TransactionBuilder.fromXDR(xdrStr, networkPassphrase);
-          const result = await rpcServer.simulateTransaction(tx);
+          const result = await withRetry(() => rpcServer.simulateTransaction(tx));
 
           if (rpcHelpers.Api.isSimulationError(result)) {
             return { error: result.error };
@@ -418,7 +420,7 @@ export async function getFeeStats(
 ): Promise<FeeStats> {
   const url = `${FEE_STATS_HORIZON_URLS[network]}/fee_stats`;
 
-  const response = await fetchImpl(url, { signal: options.signal });
+  const response = await withRetry(() => fetchImpl(url, { signal: options.signal }));
 
   if (!response.ok) {
     throw new Error(`Horizon fee_stats request failed: ${response.status}`);
