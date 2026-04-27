@@ -118,7 +118,7 @@ export default function TransactionCard({ transaction, isNew = false }: Transact
               </div>
             </div>
           </div>
-          <h4 className={`text-xl font-black tracking-tight mt-0.5 ${config.color}`}>
+          <h4 className={`text-xl font-black tracking-tight mt-0.5 truncate ${config.color}`}>
             {transaction.amount}
           </h4>
         </div>
@@ -167,12 +167,12 @@ export default function TransactionCard({ transaction, isNew = false }: Transact
       </div>
       
       {/* Mobile view for extra details */}
-      <div className="mt-4 pt-4 border-t border-white/5 flex sm:hidden items-center justify-between text-[10px] text-dark-600 font-medium">
-        <div className="flex items-center gap-2">
-          <Calendar className="h-3 w-3 opacity-70" />
-          <span>{formattedDate}</span>
+      <div className="mt-4 pt-4 border-t border-white/5 flex sm:hidden items-center justify-between text-[10px] text-dark-600 font-medium overflow-hidden">
+        <div className="flex items-center gap-2 min-w-0 pr-2">
+          <Calendar className="h-3 w-3 opacity-70 shrink-0" />
+          <span className="truncate">{formattedDate}</span>
         </div>
-        <div className="flex items-center gap-1.5 font-mono italic">
+        <div className="flex items-center gap-1.5 font-mono italic shrink-0">
           <Hash className="h-2.5 w-2.5 opacity-50" />
           <span>{transaction.txHash.slice(0, 12)}...</span>
         </div>

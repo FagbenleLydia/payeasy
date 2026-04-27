@@ -86,22 +86,24 @@ export default function TransactionList({
             />
           </div>
 
-          <div className="flex items-center gap-3 w-full md:w-auto">
-            <div className="flex-1 md:flex-none md:w-44">
-              <TypeFilter value={typeFilter} onChange={setTypeFilter} />
+          <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 w-full md:w-auto">
+            <div className="flex items-center gap-3 w-full md:w-auto">
+              <div className="flex-1 md:flex-none md:w-44">
+                <TypeFilter value={typeFilter} onChange={setTypeFilter} />
+              </div>
+
+              <button
+                type="button"
+                className="flex-1 md:flex-none btn-secondary !py-2.5 !px-4 !text-xs !bg-dark-900/40 !border-white/10 hover:!border-white/20"
+              >
+                Latest First
+              </button>
             </div>
 
             <button
               type="button"
-              className="flex-1 md:flex-none btn-secondary !py-2.5 !px-4 !text-xs !bg-dark-900/40 !border-white/10 hover:!border-white/20"
-            >
-              Latest First
-            </button>
-
-            <button
-              type="button"
               onClick={() => exportTransactionsToCsv(filteredTransactions)}
-              className="flex-1 md:flex-none btn-primary !py-2.5 !px-4 !text-xs shadow-lg shadow-brand-500/20"
+              className="w-full md:w-auto flex-none btn-primary !py-2.5 !px-4 !text-xs shadow-lg shadow-brand-500/20 justify-center"
             >
               <Download className="h-3.5 w-3.5" />
               Export CSV

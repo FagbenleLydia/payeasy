@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import EscrowStatus from "@/components/escrow/EscrowStatus";
 import FundingProgress from "@/components/escrow/FundingProgress";
 import MultiSigApproval from "@/components/escrow/MultiSigApproval";
-import RoommateList from "@/components/escrow/RoommateList";
+import RoommateTable from "@/components/escrow/RoommateTable";
 import ContributeForm from "@/components/escrow/ContributeForm";
 import EscrowDashboardSkeleton from "@/components/escrow/EscrowDashboardSkeleton";
 import TransactionReview from "@/components/wallet/TransactionReview";
@@ -310,7 +310,7 @@ export default function EscrowDashboardClient({ contractId }: Props) {
                 </div>
               </div>
 
-              <RoommateList roommates={contractState!.roommates} />
+              <RoommateTable roommates={contractState!.roommates} />
 
               {/* Contribute Form — visible only to the current roommate if they haven't paid full share */}
               {currentRoommate && !currentRoommate.isPaid && contractState?.status !== "funded" && (

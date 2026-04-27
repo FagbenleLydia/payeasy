@@ -101,8 +101,12 @@ export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
       let count = 0;
       let animationId = 0;
 
+      const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
       const animate = () => {
-        animationId = window.requestAnimationFrame(animate);
+        if (!prefersReducedMotion) {
+          animationId = window.requestAnimationFrame(animate);
+        }
 
         const positionAttribute = geometry.attributes.position;
         const posArray = positionAttribute.array as Float32Array;
@@ -129,6 +133,9 @@ export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
+        if (prefersReducedMotion) {
+          renderer.render(scene, camera);
+        }
       };
 
       window.addEventListener("resize", handleResize);
